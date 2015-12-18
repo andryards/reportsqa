@@ -1,0 +1,203 @@
+class MyTools {
+	
+			
+public function downFTP($ftp_server,$ftp_user_name,$ftp_user_pass,$server_file,$local_file)
+{	
+	$conn_id = ftp_connect($ftp_server);		 	
+	$login_result = ftp_login($conn_id, $ftp_user_name, $ftp_user_pass);
+	if (ftp_get($conn_id, $local_file, $server_file, FTP_BINARY)) {
+		echo "Successfully written $local_file\n";
+	} else {
+		echo "There was a problem $local_file\n";			
+	}
+	ftp_close($conn_id);		
+}
+
+public function LACCI2G($database,$tabel)
+{	
+	include('dbConnect.php');
+		$query="
+			UPDATE $database.$tabel
+			SET 
+			LAC=conv(substr(CGI,6,4),16,10),
+			CI=conv(substr(CGI,10,4),16,10);";		
+		$query_result = mysqli_query($con,$query);
+		//echo $query;
+		mysqli_close($con);		
+}
+
+public function UploadCSV($database,$tabel)
+	{
+		include('dbConnect.php');
+		$query="
+			LOAD DATA LOCAL INFILE '/home/www/MyDump2/pmneexport/$database/$tabel.csv'
+			INTO TABLE $database.$tabel
+			FIELDS 
+			 TERMINATED BY ','
+			LINES 
+			 TERMINATED BY '\"';";		
+		$query_result = mysqli_query($con,$query);
+		if ($query_result) {
+			echo date('Ymd His')." - $tabel load success \n";
+		} else {
+			echo date('Ymd His')." - $tabel failure \n" . mysqli_error();		
+		}
+		mysqli_close($con);
+		
+		//echo $query;
+	
+	}
+
+public function Parsing_2G($database,$xmladdress,$bsc,$subsetid,$table_type){
+	if (file_exists($xmladdress)) 
+	   {
+	   $xml = simplexml_load_file($xmladdress);
+	   $f = fopen('/home/www/MyDump2/pmneexport/'.$database.'/h2g_' . $subsetid.'.csv', 'w');
+	   echo $f;
+	   //$subsetid='1275069419';
+	     
+		foreach ($xml->measData->measInfo as $measInfo){
+			$measInfoId = $measInfo['measInfoId'];
+			/*$resultTime = $measInfo->granPeriod['endTime'];		
+			$resultTime = str_replace('T',' ',$resultTime);
+			$resultTime = substr($resultTime, 0, -6);
+			$resulttime = date('Y-m-d H:00', $resultTime - (60*60)); */
+			//echo $resultTime;
+			 foreach ($xml->fileHeader as $fileHeader){
+						$resultTime = $fileHeader->measCollec['beginTime'];		
+						$resultTime = str_replace('T',' ',$resultTime);
+						$resultTime = substr($resultTime, 0, -6);
+						//echo $resultTime;
+				}
+			
+			if (strpos($measInfoId,$subsetid) !== false){  //find subsetid
+					
+				foreach ($measInfo->measValue as $measValue){
+									
+					$measTypes = $measInfo->measTypes; //subsetid
+					$measTypes = str_replace(' ',',CID',$measTypes);
+					$measTypes = 'CID'.substr($measTypes, 0, -4);
+					
+					$measObjLdn = $measValue['measObjLdn']; //Object				
+					$NEName = substr($measObjLdn,0,strpos($measObjLdn,'/'));
+							
+					$measResults = $measValue->measResults; //ValueResult
+					$measResults = str_replace(' ',',',$measResults);
+					$measResults = str_replace('NIL','NULL',$measResults);
+					$measResults = substr($measResults, 0, -1);
+					
+					//$table_type='GCELL';
+					switch ($table_type){
+							case 'GCELL':
+								$ObjLd=explode(',',$measObjLdn);
+								$a = $ObjLd[0];
+								$ObjLd2=explode('/',$a);
+								$MBSC=$ObjLd2[0];
+								$cellname=substr($ObjLd[0],strpos($ObjLd[0],'=')+1,strlen($ObjLd[0]));
+								$CellIndex=substr($ObjLd[1],strpos($ObjLd[1],'=')+1,strlen($ObjLd[1]));
+								$CGI=substr($ObjLd[2],strpos($ObjLd[2],'=')+1,strlen($ObjLd[2]));
+								
+								$val =$resultTime.",".$MBSC.",".$cellname.",".$CellIndex.",".$CGI.",NULL,NULL,".$measResults;
+								//echo $val;
+							case 'XPU':
+								$ObjLd=explode(',',$measObjLdn);
+								$a = $ObjLd[0];
+								$ObjLd2=explode('/',$a);
+								$MBSC=$ObjLd2[0];
+								$SlotNo=substr($ObjLd[0],strpos($ObjLd[0],'=')+1,strlen($ObjLd[0]));
+								$SubrackNo=substr($ObjLd[1],strpos($ObjLd[1],'=')+1,strlen($ObjLd[1]));
+								$SubsystemNo=substr($ObjLd[2],strpos($ObjLd[2],'=')+1,strlen($ObjLd[2]));
+
+								$val =	$resultTime.",".$MBSC.",".$SlotNo.",".$SubrackNo.",".$SubsystemNo.",".$measResults;	
+								
+							break;
+							case 'GDSP':
+								$ObjLd=explode(',',$measObjLdn);
+								$a = $ObjLd[0];
+								$ObjLd2=explode('/',$a);
+								$MBSC=$ObjLd2[0];
+								$DSPNo=substr($ObjLd[0],strpos($ObjLd[0],'=')+1,strlen($ObjLd[0]));
+								$SlotNo=substr($ObjLd[1],strpos($ObjLd[1],'=')+1,strlen($ObjLd[1]));
+								$SubrackNo=substr($ObjLd[2],strpos($ObjLd[2],'=')+1,strlen($ObjLd[2]));	
+								
+								$val =$resultTime.",".$MBSC.",".$DSPNo.",".$SlotNo.",".$SubrackNo.",".$measResults;
+								
+							break;
+							case 'MBSC':
+								$ObjLd=explode('/',$measObjLdn);
+								$MBSC=$ObjLd[0];																
+								$val = $resultTime.",".$MBSC.",".$measResults;
+								
+							break;
+							case 'TRX':
+								$ObjLd=explode(',',$measObjLdn);
+								$ObjLd0=$ObjLd[0];
+								$ObjLd1=$ObjLd[1];
+								$ObjLd2=$ObjLd[2];
+								$ObjLd3=$ObjLd[3];								
+								$ObjLda=explode('/',$ObjLd0);								
+								$ObjLdc=explode('/',$ObjLd2);
+								$MBSC=$ObjLda[0];					
+								$CellName=substr($ObjLda[1],strpos($ObjLda[1],'=')+1,strlen($ObjLda[1]));
+								$CellIndex=substr($ObjLd[1],strpos($ObjLd[1],'=')+1,strlen($ObjLd[1]));
+								$CGI=substr($ObjLdc[0],strpos($ObjLdc[0],'=')+1,strlen($ObjLdc[0]));
+								$TRX=substr($ObjLdc[1],strpos($ObjLdc[1],'=')+1,strlen($ObjLdc[1]));
+								$TRXName=substr($ObjLd[3],strpos($ObjLd[3],'=')+1,strlen($ObjLd[3]));
+																							
+								$val = $resultTime.",".$MBSC.",".$CellName.",".$CellIndex.",".$CGI.",NULL,NULL,".$TRX.",".$TRXName.",".$measResults;
+								
+								
+							break;
+							case 'GCELL_GCELL':
+								$ObjLd=explode(',',$measObjLdn);
+								$ObjLd0=$ObjLd[0];
+								$ObjLd1=$ObjLd[1];
+								$ObjLd2=$ObjLd[2];							
+								$ObjLda=explode('/',$ObjLd0);								
+								$ObjLdc=explode('/',$ObjLd2);
+								$MBSC=$ObjLda[0];					
+								$GCELL=substr($ObjLda[1],strpos($ObjLda[1],'=')+1,strlen($ObjLda[1]));
+								$CellIndex=substr($ObjLd[1],strpos($ObjLd[1],'=')+1,strlen($ObjLd[1]));
+								$CGI=substr($ObjLdc[0],strpos($ObjLdc[0],'=')+1,strlen($ObjLdc[0]));
+								$CGI1=substr($ObjLdc[1],strpos($ObjLdc[1],':')+1,strlen($ObjLdc[1]));
+																							
+								$val = $resultTime.",".$MBSC.",".$GCELL.",".$CellIndex.",".$CGI.",".$CGI1.",NULL,NULL,".$measResults;
+								
+								
+							break;
+							case 'DPCGROUP':
+								$ObjLd=explode('/',$measObjLdn);
+								$MBSC=$ObjLd[0];
+								$CNNodeIndex=substr($ObjLd[1],strpos($ObjLd[1],'=')+1,strlen($ObjLd[1]));
+								
+																								
+								$val = $resultTime.",".$MBSC.",".$CNNodeIndex.",".$measResults;
+								
+							break;
+							
+					
+					
+					}
+									
+					$hasChild = (count($measObjLdn) > 0)?true:false;
+
+					if( ! $hasChild)
+					{
+					   $put_arr = array($val); 
+					   fputcsv($f,$put_arr);
+					   
+
+					}
+					else
+					{
+					 createCsv2G($measInfo, $f);
+					}
+				}
+			}
+	 
+		}
+		 
+		   fclose($f);
+    }
+}
+}
