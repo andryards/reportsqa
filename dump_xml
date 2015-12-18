@@ -1,0 +1,369 @@
+<?php
+
+include 'dbConnect.php';
+include 'dumpTools3.php';
+$mytools = new MyTools;
+
+//$mytools->truncate_3g();
+
+date_default_timezone_set('Asia/Jakarta');
+$now = time();
+$type = "3g";
+$temptable="temp_xml$type";
+
+$i_time=0; while ($i_time>=0)
+{
+
+$time1 = date('YmdH00', $now - (60*60*($i_time+1)));
+$time2 = date('YmdH00', $now - (60*60*$i_time));
+$hour1 = substr($time1,8,4);
+$hour2 = substr($time2,8,4);
+$tgl= substr($time1,0,8); //folder ftp pmexport
+
+$resulttime = date('Y-m-d H:00', $now - (60*60*($i_time+1)));
+
+for ($i_bsc=37; $i_bsc<=48; $i_bsc++){
+switch ($i_bsc)
+{
+		case 36: $bsc='RNC_SumurPanggang'; $ftp_server=' '; $ftp_user_name=' '; $ftp_user_pass=' '; $server_dir=' '; $compress=''; break;
+		case 37: $bsc=''; $ftp_server=' '; $ftp_user_name=' '; $ftp_user_pass=' '; $server_dir=' '; $compress='.gz'; break;
+		case 38: $bsc=''; $ftp_server=' '; $ftp_user_name=' '; $ftp_user_pass=' '; $server_dir=' '; $compress='.gz'; break;
+		case 39: $bsc=''; $ftp_server=' '; $ftp_user_name=' '; $ftp_user_pass=' '; $server_dir=' '; $compress='.gz'; break;
+		case 40: $bsc=''; $ftp_server=' '; $ftp_user_name=' '; $ftp_user_pass=' '; $server_dir=' '; $compress='.gz'; break;
+		case 41: $bsc=''; $ftp_server=' '; $ftp_user_name=' '; $ftp_user_pass=' '; $server_dir=' '; $compress='.gz'; break;
+		case 42: $bsc=''; $ftp_server=' '; $ftp_user_name=' '; $ftp_user_pass=' '; $server_dir=' '; $compress='.gz'; break;
+		case 43: $bsc=''; $ftp_server=' '; $ftp_user_name=' '; $ftp_user_pass=' '; $server_dir=' '; $compress=''; break;
+		case 44: $bsc=''; $ftp_server=' '; $ftp_user_name=' '; $ftp_user_pass=' '; $server_dir=' '; $compress=''; break;
+		case 45: $bsc=''; $ftp_server=' '; $ftp_user_name=' '; $ftp_user_pass=' '; $server_dir=' '; $compress=''; break;
+		case 46: $bsc=''; $ftp_server=' '; $ftp_user_name=' '; $ftp_user_pass=' '; $server_dir=' '; $compress=''; break;
+		case 47: $bsc=''; $ftp_server=' '; $ftp_user_name=' '; $ftp_user_pass=' '; $server_dir=' '; $compress=''; break;
+		case 48: $bsc=''; $ftp_server=' '; $ftp_user_name=' '; $ftp_user_pass=' '; $server_dir=' '; $compress=''; break;
+}
+
+			//$file_name = 'pmresult_'.$subsetid.'_60_'.$time1.'_'.$time2.'.csv';
+			$file_name = "A$tgl.$hour1+0700-$hour2+0700_$bsc.xml$compress";
+			$local_dir = "/home/www/MyDump2/pmneexport2/";
+
+			$local_file = $local_dir.$file_name;
+			$server_file = $server_dir.'neexport_'.$tgl.'/'.$bsc.'/'.$file_name;
+
+			//download from FTP
+			$mytools->downFTP($ftp_server,$ftp_user_name,$ftp_user_pass,$server_file,$local_file);
+
+			//Unzip if Compresed
+			$local_file = str_replace('.gz','',$local_file);
+			if ($compress=='.gz')
+			{
+				if(file_exists($local_file))
+				  {
+				chmod($local_file,0777);
+				unlink($local_file);
+				  }
+				system("gunzip $local_file");
+			}
+
+for ($i_subset=1; $i_subset<=34; $i_subset++){
+
+		switch ($i_subset) //pilih counter untuk penentuan subset
+		{	
+				case 1: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109365';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 2: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109367';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 3: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109368';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 4: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109369';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 5: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109371';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 6: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109372';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 7: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109373';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 8: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109376';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 9: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109377';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 10: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109378';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 11: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109379';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 12: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109380';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 13: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109381';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 14: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109385';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 15: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109386';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 16: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109390';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 17: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109391';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 18: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109471';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 19: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109508';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 20: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109509';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 21: 
+					$xmladdress = $local_file;							
+					$subsetid ='82863958';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 22: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109500';
+					$table_type = 'ANI';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 23: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109546';
+					$table_type = 'UDSP';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 24: 
+					$xmladdress = $local_file;							
+					$subsetid ='82833961';
+					$table_type = 'INT';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 25: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109467';
+					$table_type = 'IPPATH';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 26: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109539';
+					$table_type = 'IPPATH';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 27: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109460';
+					$table_type = 'RNC';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 28: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109438';
+					$table_type = 'RNC';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 29: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109422';
+					$table_type = 'RNC';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 30: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109426';
+					$table_type = 'RNC';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 31: 
+					$xmladdress = $local_file;							
+					$subsetid ='82833917';
+					$table_type = 'XPU';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 32: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109375';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 33: 
+					$xmladdress = $local_file;							
+					$subsetid ='67109545';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+				case 34: 
+					$xmladdress = $local_file;							
+					$subsetid ='82863947';
+					$table_type = 'GCELL';
+					$tabel="h3g_$subsetid";
+					$mytools->Parsing_3G($xmladdress,$bsc,$subsetid,$table_type);
+					$mytools->UploadCSV($tabel);
+				break;
+					
+					
+					}
+
+
+
+} // switch subset
+unlink($local_file);
+
+} // switch bsc
+
+
+$mytools->toKPI3GH($resulttime);
+$mytools->toKPIRNC3GH($resulttime);
+
+$mytools->toCAP3GH($resulttime);
+$mytools->IuBPINGLOSS($resulttime);
+//$mytools->toPerformance3g($resulttime);
+
+//$mytools->verifikasi_3g($resulttime);
+//$mytools->truncate_3g();
+//$mytools->truncate($temptable);
+
+
+
+$i_time=$i_time-1;
+}; // switch time
+
+
